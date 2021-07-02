@@ -15,4 +15,6 @@
 # vendor/
 
 files/
-microweb
+microweb*
+go.mod
+go.sum
