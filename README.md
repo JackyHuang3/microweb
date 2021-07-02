@@ -7,6 +7,14 @@ microweb是一个极简web静态服务器, 单文件跨平台, 支持文本文�
 
 ![image](web.png)
 
+# Installation
+
+linux: wget https://download.refitself.cn/files/microweb/microweb_linux_amd64
+
+windows: wget https://download.refitself.cn/files/microweb/microweb_windows_amd64.ext
+
+darwin: wget https://download.refitself.cn/files/microweb/microweb_darwin_amd64
+
 # go get Installation (Development)
 ```go
 go get github.com/refitor/microweb
