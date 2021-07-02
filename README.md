@@ -3,7 +3,7 @@ microweb is a minimalist web static server that supports resource file previews 
 
 microweb是一个极简web静态服务器, 支持文本文件,图片, 音视频，以及pdf文档等资源文件预览，支持控制脚本针对文件下载或目录访问执行shell指令
 
-[![image](demo.png)]
+![image](demo.png)
 
 # go get Installation (Development)
 ```go
