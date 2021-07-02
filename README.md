@@ -5,6 +5,8 @@ microweb是一个极简web静态服务器, 支持文本文件,图片, 音视频�
 
 ![image](demo.png)
 
+![image](web.png)
+
 # go get Installation (Development)
 ```go
 go get github.com/refitor/microweb
