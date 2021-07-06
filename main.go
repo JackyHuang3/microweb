@@ -20,6 +20,7 @@ import (
 var memfs embed.FS
 type microFS string
 var downloader = http.FileServer(microFS(""))
+var filesResource = flag.String("files", "./", "--files=./resource")
 var controlScript = flag.String("script", "", "--script=./control.sh, execute demo: ./control.sh /files abc.txt")
 
 func main() {
@@ -37,10 +38,11 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p microFS) Open(name string) (http.File, error) {
-	if strings.HasPrefix(name, "/microweb") {
-		name = strings.TrimPrefix(name, "/microweb")
+	workDir, _ := os.Getwd()
+	if strings.HasPrefix(name, "/" + filepath.Base(workDir)) {
+		name = strings.TrimPrefix(name, "/" + filepath.Base(workDir))
 	}
-	fpath := "./" + strings.TrimPrefix(name, "/")
+	fpath := *filesResource + strings.TrimPrefix(name, "/")
 
 	if _, err := os.Stat(fpath); err != nil {
 		return http.FS(memfs).Open("web/" + strings.TrimPrefix(name, "/"))
@@ -51,7 +53,7 @@ func (p microFS) Open(name string) (http.File, error) {
 				return nil, errors.New(strings.TrimPrefix(string(output), "false:"))
 			}
 		}
-		return http.Dir("./").Open(fpath)
+		return http.Dir("").Open(fpath)
 	}
 }
 
