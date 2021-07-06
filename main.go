@@ -61,7 +61,10 @@ func ScanHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	directory := r.URL.Query().Get("directory")
 	if directory == "" {
-		directory, _ = os.Getwd()
+		directory = *filesResource
+		if directory == "./" {
+			directory, _ = os.Getwd()
+		}
 	}
 
 	ret := make(map[string]interface{}, 0)
