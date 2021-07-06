@@ -1,8 +1,7 @@
 package main
 
-//go:generate /bin/sh -c "go build -ldflags=\"-w -s\" -i"
-//go:generate rice append --exec microweb
 import (
+	"embed"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -10,17 +9,17 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	rice "github.com/GeertJohan/go.rice"
 )
 
-type FS string
-var memfs, _ = rice.FindBox("web")
-var downloader = http.FileServer(FS(""))
+//go:embed web
+var memfs embed.FS
+type microFS string
+var downloader = http.FileServer(microFS(""))
 var controlScript = flag.String("script", "", "--script=./control.sh, execute demo: ./control.sh /files abc.txt")
 
 func main() {
@@ -37,30 +36,30 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (p FS) Open(name string) (http.File, error) {
-	fpath := name
-	root := "./web"
-	if strings.HasPrefix(name, "/files") {
-		root = "./files"
-		fpath = strings.TrimPrefix(fpath, "/files")
+func (p microFS) Open(name string) (http.File, error) {
+	if strings.HasPrefix(name, "/microweb") {
+		name = strings.TrimPrefix(name, "/microweb")
 	}
-	if *controlScript != "" {
-		output, _ := exec.Command(*controlScript, filepath.Dir(fpath), filepath.Base(fpath)).Output()
-		if strings.HasPrefix(string(output), "false:") {
-			return nil, errors.New(strings.TrimPrefix(string(output), "false:"))
+	fpath := "./" + strings.TrimPrefix(name, "/")
+
+	if _, err := os.Stat(fpath); err != nil {
+		return http.FS(memfs).Open("web/" + strings.TrimPrefix(name, "/"))
+	} else {
+		if *controlScript != "" {
+			output, _ := exec.Command(*controlScript, filepath.Dir(fpath), filepath.Base(fpath)).Output()
+			if strings.HasPrefix(string(output), "false:") {
+				return nil, errors.New(strings.TrimPrefix(string(output), "false:"))
+			}
 		}
+		return http.Dir("./").Open(fpath)
 	}
-	if strings.HasPrefix(name, "/files") {
-		return http.Dir(root).Open(fpath)
-	}
-	return memfs.Open(fpath)
 }
 
 func ScanHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	directory := r.URL.Query().Get("directory")
 	if directory == "" {
-		directory = "./files"
+		directory, _ = os.Getwd()
 	}
 
 	ret := make(map[string]interface{}, 0)

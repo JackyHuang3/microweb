@@ -9,11 +9,9 @@ microweb是一个极简web静态服务器, 单文件跨平台, 支持文本文�
 
 # Installation
 
-linux: wget https://download.refitself.cn/files/microweb/microweb_linux_amd64
+support: cross-platform
 
-windows: wget https://download.refitself.cn/files/microweb/microweb_windows_amd64.exe
-
-darwin: wget https://download.refitself.cn/files/microweb/microweb_darwin_amd64
+download: [refitself][1]
 
 # go get Installation (Development)
 ```go
@@ -43,3 +41,5 @@ cd ./microweb && go generate
 ./microweb
 
 ```
+
+[1]: https://download.refitself.cn
