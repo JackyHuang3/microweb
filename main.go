@@ -95,6 +95,9 @@ func readDir(dirPath, trimPrefix string, parentMap map[string]interface{}) (map[
 				subMap["name"] = f.Name()
 				subMap["size"] = f.Size()
 				subMap["path"] = strings.TrimPrefix(dirPath+"/"+f.Name(), trimPrefix)
+				if _, ok := subMap["items"]; !ok {
+					subMap["items"] = make([]interface{}, 0)
+				}
 
 				if _, ok := parentMap["items"]; !ok {
 					parentMap["items"] = make([]interface{}, 0)
