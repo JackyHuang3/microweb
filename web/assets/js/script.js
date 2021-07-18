@@ -11,14 +11,25 @@ function getQueryVariable(variable) {
 }
 
 $(function(){
+    $.get('/visit', function(respdata) {
+        if (respdata !== '') {
+            var code = prompt(respdata);
+            if (code !== '' && code !== null) {
+                scan(code);
+            }
+        }
+        scan('');
+    })
+})
+
+function scan(code){
     let filemanager = $('.filemanager')
     let breadcrumbs = $('.breadcrumbs')
     let fileList = filemanager.find('.data')
+    let rootDir = getQueryVariable('path') === undefined ? '' : getQueryVariable('path');
 
     // Start by fetching the file data from scan route with an AJAX request
-    let filesPath = getQueryVariable('path')
-    // initFunc('/api/file/scan?path=' + filesPath, function(respdata) {
-    $.get('/scan?path=' + filesPath, function(respdata) {
+    $.get('/scan?path=' + rootDir + '&code=' + code, function(respdata) {
         // respdata = respdata.data;
         let response = [respdata]
         let currentPath = ''
@@ -107,10 +118,15 @@ $(function(){
                 breadcrumbsUrls.push(nextDir)
             }
 
-            window.location.hash = encodeURIComponent(nextDir)
-            currentPath = nextDir
+            let visitHash = encodeURIComponent(nextDir);
+            $.get('/visit?hash=' + visitHash, function(respdata) {
+                if (respdata !== '') {
+                    code = prompt(respdata);
+                }
+                window.location.hash = visitHash;
+                currentPath = nextDir;
+            })
         })
-
 
         // Clicking on breadcrumbs
         breadcrumbs.on('click', 'a', function(e){
@@ -164,7 +180,7 @@ $(function(){
 
                 // if there is no hash
                 else {
-                    console.log(data.path)
+                    // console.log(data.path)
                     currentPath = data.path
                     breadcrumbsUrls.push(data.path)
                     render(searchByPath(data.path))
@@ -188,13 +204,13 @@ $(function(){
             let demo = response
             let flag = 0
 
-            console.log('dir:' + dir)
-            console.log('path:' + path)
-            console.log('demo:' + JSON.stringify(demo))
+            // console.log('dir:' + dir)
+            // console.log('path:' + path)
+            // console.log('demo:' + JSON.stringify(demo))
             for (let i=0; i<path.length; i++) {
                 for (let j=0; j<demo.length; j++) {
-                    console.log(demo[j].name)
-                    console.log(path[i])
+                    // console.log(demo[j].name)
+                    // console.log(path[i])
                     if (demo[j].name === path[i]) {
                         flag = 1
                         demo = demo[j].items
@@ -293,7 +309,8 @@ $(function(){
                     icon = '<span class="icon file f-' + fileType + '">' + fileType + '</span>'
 
                     let file = null;
-                    let fileUrl = f.path;
+                    let qcode = code === null ? '' : code;
+                    let fileUrl = f.path + '?code=' + qcode;
                     let isImg = name.indexOf('.png') > 0 || name.indexOf('.jpg') > 0 || name.indexOf('.jpeg') > 0 || name.indexOf('.gif') > 0 || name.indexOf('.bmp') > 0;
                     if (isImg) file = $('<li class="files"><a data-fancybox="gallery" href="'+ fileUrl+'" title="'+ f.path +'" class="files">'+icon+'<span class="name">'+ name +'</span> <span class="details">'+fileSize+'</span></a></li>');
                     else file = $('<li class="files"><a href="'+ fileUrl+'" title="'+ f.path +'" class="files">'+icon+'<span class="name">'+ name +'</span> <span class="details">'+fileSize+'</span></a></li>')
@@ -345,5 +362,5 @@ $(function(){
             return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i]
         }
     })
-})
+}
 // }
